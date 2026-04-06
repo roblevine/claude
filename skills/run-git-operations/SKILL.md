@@ -38,10 +38,10 @@ Commands that operate purely locally are always safe to run yourself:
 Check the environment detection output above:
 
 - **If `commit.gpgsign=true`:** You cannot sign commits because you don't have access to the signing key. Do NOT attempt `git commit` yourself. Instead:
-  1. Stage files yourself with `git add` as needed.
-  2. Output the exact command the user needs to run, as a plain command string. **Never** use heredoc/`cat <<EOF` form — give the user a simple, directly-pasteable command.
-  3. For commit messages with newlines, use a multi-line command.
-  4. Tell the user to run it from a terminal.
+  1. Do all prep work yourself — `git add`, `git reset`, `git stash`, etc. Don't make the user run anything they don't have to.
+  2. Output **only** the commit command for the user to run, as a plain directly-pasteable command string. Never use heredoc/`cat <<EOF` form.
+  3. For multi-paragraph commit messages, use multiple `-m` flags (one per paragraph).
+  4. For multi-commit workflows, stage and pause for each commit — don't batch all commands at the end.
 
 - **If `commit.gpgsign=false` or not set:** Run `git commit` directly yourself.
 
@@ -49,8 +49,6 @@ Check the environment detection output above:
 
 Example output format when delegating:
 ```
-Please run this command from your terminal:
-
 git commit -m "Add new feature" -m "Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ```
 
@@ -58,6 +56,10 @@ git commit -m "Add new feature" -m "Co-Authored-By: Claude Opus 4.6 (1M context)
 
 Check the environment detection output above:
 
-- **If the remote URL uses SSH (`git@...`):** SSH key authentication is required which you may not have access to. Do NOT attempt remote commands yourself — output the exact command for the user to run with `!` prefix.
-- **If the remote URL uses HTTPS:** Attempt the command directly. If it fails with an authentication error, do NOT retry — output the exact command for the user to run with `!` prefix.
+- **If the remote URL uses SSH (`git@...`):** SSH key authentication is required which you may not have access to. Do NOT attempt remote commands yourself — output the exact command for the user to run.
+- **If the remote URL uses HTTPS:** Attempt the command directly. If it fails with an authentication error, do NOT retry — output the exact command for the user to run.
 - **If there is no remote:** Run commands directly (they will fail harmlessly if a remote is needed).
+
+## General principle
+
+You should run every git command you can directly. Only hand the user commands that require interactive authentication (GPG signing, SSH keys, credential prompts). The user should never have to run `git add`, `git reset`, `git status`, etc. themselves.
