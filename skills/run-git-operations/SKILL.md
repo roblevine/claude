@@ -14,17 +14,11 @@ This skill governs how you execute git commands. The environment is detected dyn
 echo "=== Commit signing ==="
 SIGN=$(git config --get commit.gpgsign 2>/dev/null || echo "false")
 echo "commit.gpgsign=$SIGN"
-
 echo "=== Tag signing ==="
 TAG_SIGN=$(git config --get tag.gpgsign 2>/dev/null || echo "not set")
 echo "tag.gpgsign=$TAG_SIGN"
-
 echo "=== GPG format ==="
 git config --get gpg.format 2>/dev/null || echo "not set"
-
-echo "=== Remote URL ==="
-git remote get-url origin 2>/dev/null || echo "no remote"
-
 ```
 
 ## Local git commands — always run directly
@@ -54,11 +48,14 @@ git commit -m "Add new feature" -m "Co-Authored-By: Claude Opus 4.6 (1M context)
 
 ## Remote git commands (fetch, pull, push)
 
-Check the environment detection output above:
+Attempt remote commands directly using batch mode to prevent interactive auth prompts:
 
-- **If the remote URL uses SSH (`git@...`):** SSH key authentication is required which you may not have access to. Do NOT attempt remote commands yourself — output the exact command for the user to run.
-- **If the remote URL uses HTTPS:** Attempt the command directly. If it fails with an authentication error, do NOT retry — output the exact command for the user to run.
-- **If there is no remote:** Run commands directly (they will fail harmlessly if a remote is needed).
+```
+GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" git push 2>&1
+```
+
+- If the command succeeds, you're done.
+- If it fails with an auth-related error (permission denied, terminal prompts disabled, etc.), do NOT retry — output the exact command (without the batch mode env vars) for the user to run.
 
 ## General principle
 
