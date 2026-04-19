@@ -43,7 +43,11 @@ Check the environment detection output above:
 
 Example output format when delegating:
 ```
-git commit -m "Add new feature" -m "Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
+git commit -m "Add new feature
+
+Some additional details about the commit message.
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ```
 
 ## Remote git commands (fetch, pull, push)
