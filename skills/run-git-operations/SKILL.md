@@ -34,7 +34,7 @@ Check the environment detection output above:
 - **If `commit.gpgsign=true`:** You cannot sign commits because you don't have access to the signing key. Do NOT attempt `git commit` yourself. Instead:
   1. Do all prep work yourself — `git add`, `git reset`, `git stash`, etc. Don't make the user run anything they don't have to.
   2. Output **only** the commit command for the user to run, as a plain directly-pasteable command string. Never use heredoc/`cat <<EOF` form.
-  3. For multi-paragraph commit messages, use multiple `-m` flags (one per paragraph).
+  3. For multi-paragraph commit messages, use a single `-m` flag with embedded newlines inside one quoted string (matches the example below). Never use multiple `-m` flags or heredoc form.
   4. For multi-commit workflows, stage and pause for each commit — don't batch all commands at the end.
 
 - **If `commit.gpgsign=false` or not set:** Run `git commit` directly yourself.
