@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // setup-pii-guard: engine v1
 // PII tripwire — fail the commit/push/CI job if the diff contains likely real PII.
 // Scans ADDED lines only (not whole files), so pre-existing content in
