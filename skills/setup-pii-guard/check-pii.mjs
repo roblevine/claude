@@ -9,10 +9,17 @@
 // Repo-specific allowlists live in ./pii-guard.config.mjs, imported below —
 // this file is the shared engine and is safe to overwrite on update.
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { EMAIL_ALLOW_DOMAINS } from "./pii-guard.config.mjs";
 
 export const SKIP_FILES = new Set(["package-lock.json", "yarn.lock", "pnpm-lock.yaml"]);
+
+// SKIP_FILES holds bare basenames, but diff paths are repo-relative (e.g.
+// `packages/foo/package-lock.json`) — compare basenames so lockfiles in
+// subdirectories are skipped too.
+export function isSkippedFile(file) {
+  return SKIP_FILES.has(file.split("/").pop());
+}
 
 // UK Ofcom drama range — 9 digits after the 447 country+mobile prefix.
 export function isAllowedNumber(digits12) {
@@ -117,13 +124,14 @@ export function parseRangeArg(argv) {
 function main() {
   const range = parseRangeArg(process.argv.slice(2));
   const diffTarget = range ? [range] : ["--cached"];
-  const diff = execSync(
-    ["git", "diff", ...diffTarget, "--unified=0", "--no-color", "--diff-filter=AM"].join(" "),
+  const diff = execFileSync(
+    "git",
+    ["diff", ...diffTarget, "--unified=0", "--no-color", "--diff-filter=AM"],
     { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
   );
   const findings = [];
   for (const { file, lineNo, line } of iterAddedLines(diff)) {
-    if (!file || SKIP_FILES.has(file) || line.includes("pii-check-ignore")) continue;
+    if (!file || isSkippedFile(file) || line.includes("pii-check-ignore")) continue;
     for (const hit of scan(line)) findings.push({ file, lineNo, ...hit });
   }
   if (findings.length) {

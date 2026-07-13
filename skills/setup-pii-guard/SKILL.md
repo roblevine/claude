@@ -140,7 +140,7 @@ node scripts/check-pii.mjs; echo "exit=$?"
 Expected: no findings, `exit=0`.
 
 ```bash
-git reset -q HEAD __pii_guard_fixture__.js 2>/dev/null
+git rm --cached -q __pii_guard_fixture__.js 2>/dev/null || true
 rm -f __pii_guard_fixture__.js
 ```
 
@@ -171,11 +171,12 @@ differs from this skill's bundled one.
    ```bash
    cp <this-skill-dir>/check-pii.mjs scripts/check-pii.mjs
    ```
-   Then diff the installed `.husky/pre-push` block and any installed CI
-   step against `<this-skill-dir>/pre-push.snippet.sh` and
-   `ci-step.snippet.yml` (a plain byte comparison is fine — these are
-   small, stable files). If they differ, show the diff and ask separately
-   before updating each.
+   Then diff the installed `.husky/pre-commit` line, the installed
+   `.husky/pre-push` block, and any installed CI step against
+   `<this-skill-dir>/pre-commit.snippet.sh`, `pre-push.snippet.sh`, and
+   `ci-step.snippet.yml` respectively (a plain byte comparison is fine —
+   these are small, stable files). If they differ, show the diff and ask
+   separately before updating each.
 4. `scripts/pii-guard.config.mjs` is **never** touched by this flow,
    regardless of the answer above.
 5. On decline: make no changes; tell the user they can re-run the skill

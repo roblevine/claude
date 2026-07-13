@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { scan, iterAddedLines, parseRangeArg } from "./check-pii.mjs";
+import { scan, iterAddedLines, parseRangeArg, isSkippedFile } from "./check-pii.mjs";
 
 test("scan: flags a UK mobile outside the Ofcom drama range", () => {
   const hits = scan('const phone = "+44 7911 123456";');
@@ -79,4 +79,16 @@ test("parseRangeArg: returns null when --range is absent", () => {
 
 test("parseRangeArg: returns the value when --range is present", () => {
   assert.equal(parseRangeArg(["--range", "origin/main...HEAD"]), "origin/main...HEAD");
+});
+
+test("isSkippedFile: matches a lockfile at repo root", () => {
+  assert.equal(isSkippedFile("package-lock.json"), true);
+});
+
+test("isSkippedFile: matches a lockfile nested in a subdirectory", () => {
+  assert.equal(isSkippedFile("packages/foo/package-lock.json"), true);
+});
+
+test("isSkippedFile: does not match an unrelated file", () => {
+  assert.equal(isSkippedFile("packages/foo/index.js"), false);
 });

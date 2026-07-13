@@ -16,6 +16,8 @@ do
     # New branch / new upstream: diff against what's actually new relative
     # to main, falling back to the tip commit, then to "scan everything in
     # this commit" — never silently skip the check.
+    # Assumes the default branch is origin/main; adapt this for repos whose
+    # default branch is named differently (e.g. master, develop).
     base=$(git merge-base origin/main "$local_sha" 2>/dev/null)
     [ -z "$base" ] && base=$(git rev-parse "$local_sha^" 2>/dev/null)
     [ -z "$base" ] && base="$empty_tree"
