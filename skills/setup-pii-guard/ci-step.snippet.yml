@@ -1,0 +1,19 @@
+- name: PII check
+  # Adapt or remove `working-directory` to match this repo's checkout layout.
+  # The checkout step for this job needs `fetch-depth: 0` (or enough depth
+  # to resolve the PR base / pre-push SHA) for the range below to resolve.
+  working-directory: .
+  run: |
+    zero_sha="0000000000000000000000000000000000000000"
+    empty_tree="4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+    if [ "${{ github.event_name }}" = "pull_request" ]; then
+      range="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+    else
+      before="${{ github.event.before }}"
+      if [ -z "$before" ] || [ "$before" = "$zero_sha" ]; then
+        range="$empty_tree..${{ github.sha }}"
+      else
+        range="$before..${{ github.sha }}"
+      fi
+    fi
+    node scripts/check-pii.mjs --range "$range"
